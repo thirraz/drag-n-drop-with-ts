@@ -122,7 +122,8 @@ var ProjectItem = /** @class */ (function (_super) {
         configurable: true
     });
     ProjectItem.prototype.dragStartHandler = function (event) {
-        console.log(event);
+        event.dataTransfer.setData("text/plain", this.project.id);
+        event.dataTransfer.effectAllowed = "move";
     };
     ProjectItem.prototype.dragEndHandler = function (_) {
         console.log("Dragend");
@@ -144,13 +145,29 @@ var ProjectList = /** @class */ (function (_super) {
     function ProjectList(type) {
         var _this = _super.call(this, "#project-list", "#app", false, "".concat(type, "-projects")) || this;
         _this.type = type;
+        _this.listEl = _this.element.querySelector("ul");
         _this.assignedProjects = [];
         _this.configure();
         _this.renderContent();
         return _this;
     }
+    ProjectList.prototype.dragOverHandler = function (event) {
+        if (event.dataTransfer && event.dataTransfer.types[0] === "text/plain") {
+            event.preventDefault();
+            this.listEl.classList.add("droppable");
+        }
+    };
+    ProjectList.prototype.dragLeaveHandler = function (event) {
+        this.listEl.classList.remove("droppable");
+    };
+    ProjectList.prototype.dropHandler = function (event) {
+        console.log(event.dataTransfer.getData("text/plain"));
+    };
     ProjectList.prototype.configure = function () {
         var _this = this;
+        this.element.addEventListener("dragover", this.dragOverHandler.bind(this));
+        this.element.addEventListener("dragleave", this.dragLeaveHandler.bind(this));
+        this.element.addEventListener("drop", this.dropHandler.bind(this));
         projectState.addListener(function (projects) {
             var relevantProjects = projects.filter(function (prj) {
                 if (_this.type === "active")

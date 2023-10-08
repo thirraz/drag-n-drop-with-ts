@@ -170,7 +170,8 @@ class ProjectItem
 	}
 
 	dragStartHandler(event: DragEvent) {
-		console.log(event)
+		event.dataTransfer!.setData("text/plain", this.project.id)
+		event.dataTransfer!.effectAllowed = "move"
 	}
 
 	dragEndHandler(_: DragEvent) {
@@ -195,7 +196,11 @@ class ProjectItem
 }
 
 // ProjectList Class
-class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+class ProjectList
+	extends Component<HTMLDivElement, HTMLElement>
+	implements DragTarget
+{
+	protected listEl = this.element.querySelector("ul")!
 	assignedProjects: Project[]
 
 	constructor(private type: "active" | "finished") {
@@ -207,7 +212,29 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
 		this.renderContent()
 	}
 
+	dragOverHandler(event: DragEvent) {
+		if (event.dataTransfer && event.dataTransfer.types[0] === "text/plain") {
+			event.preventDefault()
+			this.listEl.classList.add("droppable")
+		}
+	}
+
+	dragLeaveHandler(event: DragEvent) {
+		this.listEl.classList.remove("droppable")
+	}
+
+	dropHandler(event: DragEvent) {
+		console.log(event.dataTransfer!.getData("text/plain"))
+	}
+
 	configure() {
+		this.element.addEventListener("dragover", this.dragOverHandler.bind(this))
+		this.element.addEventListener(
+			"dragleave",
+			this.dragLeaveHandler.bind(this)
+		)
+		this.element.addEventListener("drop", this.dropHandler.bind(this))
+
 		projectState.addListener((projects: Project[]) => {
 			const relevantProjects = projects.filter(prj => {
 				if (this.type === "active")
