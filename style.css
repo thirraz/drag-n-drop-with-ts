@@ -100,7 +100,6 @@ button:active {
 
 .projects li h2 {
 	color: #ff0062;
-	margin: 0.5rem 0;
 }
 
 #finished-projects li h2 {
@@ -110,6 +109,7 @@ button:active {
 .projects li h3 {
 	color: #575757;
 	font-size: 1rem;
+	margin: 1rem 0;
 }
 
 .project li p {
